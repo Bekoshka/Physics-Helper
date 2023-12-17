@@ -4,9 +4,29 @@ from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtWidgets import QApplication
 
 
-class FreeFallUi(QtWidgets.QMainWindow):
+def menuwindow():
+    app = QApplication(sys.argv)
+    window = MainMenu()
+    app.exec_()
+
+
+def launchfreefall():
+    FreeFall()
+
+
+class MainMenu(QtWidgets.QMainWindow):
     def __init__(self):
-        super(FreeFallUi, self).__init__()
+        super(MainMenu, self).__init__()
+        uic.loadUi('uis/mainmenu.ui', self)
+        self.setWindowIcon(QtGui.QIcon('pics/settingsicon.png'))
+        self.freefall.clicked.connect(launchfreefall)
+        self.exit.clicked.connect(sys.exit)
+        self.show()
+
+
+class FreeFallSettings(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(FreeFallSettings, self).__init__()
         uic.loadUi('uis/freefallsettings.ui', self)
         self.setWindowIcon(QtGui.QIcon('pics/settingsicon.png'))
 
@@ -21,7 +41,6 @@ class FreeFallUi(QtWidgets.QMainWindow):
         # красивый ui - пользователь видит 5%, которые приводятся к множителю в 0.95
         FreeFall.bouncemult = 1 - (int(self.bouncemultconfig.value()) / 100)
         FreeFall.tickrate = int(self.tickrateconfig.text())
-
         self.close()
 
     def bconfpressed(self):
@@ -42,12 +61,6 @@ class FreeFall:
         self.paused = False
         self.physobj = []
 
-        self.gravforce = 100
-        self.physobjsize = 40
-        self.bouncemult = 0.95
-        self.tickrate = 60
-        self.pausewhen = 10
-
         # Первым делом соберем настройки пользователя
         self.configscreen()
         self.screen = pygame.display.set_mode(self.size)
@@ -55,7 +68,7 @@ class FreeFall:
 
     def configscreen(self):
         app = QApplication(sys.argv)
-        window = FreeFallUi()
+        window = FreeFallSettings()
         app.exec_()
 
     def drawphysobj(self):

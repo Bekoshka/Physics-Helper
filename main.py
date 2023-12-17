@@ -1,3 +1,4 @@
-from appclasses import FreeFall, FreeFallUi
+from appclasses import menuwindow, FreeFall
 
-Process = FreeFall()
+
+menuwindow()
