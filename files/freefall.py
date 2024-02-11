@@ -1,38 +1,52 @@
 import pygame
 import sys
-from PyQt5 import QtWidgets, uic, QtGui
-from PyQt5.QtWidgets import QApplication
+from PyQt6 import uic, QtGui
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 
 
-class Ui(QtWidgets.QMainWindow):
+class Ui(QMainWindow):
     def __init__(self):
-        super(Ui, self).__init__()
+        super().__init__()
         uic.loadUi('uis/freefallsettings.ui', self)
         self.setWindowIcon(QtGui.QIcon('pics/settingsicon.png'))
 
         self.bouncemultconfig.valueChanged.connect(self.bconfpressed)
         self.savebutton.clicked.connect(self.savesettings)
         self.exitbutton.clicked.connect(sys.exit)
-        self.show()
 
     def savesettings(self):
-        global gravforce, physobjsize, bouncemult, tickrate
+        global gravforce, physobjsize, bouncemult, tickrate, paused, running
         gravforce = int(self.gravforceconfig.text())
         physobjsize = int(self.physobjsizeconfig.text())
         # красивый ui - пользователь видит 5%, которые приводятся к множителю в 0.95
         bouncemult = 1 - (int(self.bouncemultconfig.value()) / 100)
         tickrate = int(self.tickrateconfig.text())
-
-        self.close()
+        paused = False
+        self.hide()
+        mainprocess()
 
     def bconfpressed(self):
         self.percentlabel.setText(str(self.bouncemultconfig.value()) + "%")
 
 
-def configscreen():
-    app = QApplication(sys.argv)
-    window = Ui()
-    app.exec_()
+window = "closed"  # костыль
+initialised = 0
+
+
+def start():
+    global window, initialised
+    if __name__ == "__main__":
+        if not initialised:
+            app2 = QApplication(sys.argv)
+        if window == "closed":
+            window = Ui()
+        window.show()
+        if not initialised:
+            initialised = 1
+            print(initialised)
+            app2.exec()
+    else:
+        freewindow.show()
 
 
 def drawphysobj():
@@ -69,6 +83,8 @@ def reloadscreen():
     pygame.draw.rect(screen, WHITE, pygame.Rect((0, 0), (width, height)), framesize)
 
 
+running = False
+
 # константы
 WHITE = (250, 241, 245)
 BLUE = (25, 41, 88)
@@ -87,48 +103,55 @@ bouncemult = 0.95
 tickrate = 60
 pausewhen = 10
 
-# Первым делом соберем настройки пользователя
-configscreen()
-
 pygame.init()
 pygame.font.init()
 
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Свободное падение')
 pygame.display.set_icon(pygame.image.load("pics/icon.png"))
+pygame.display.set_mode(size, flags=pygame.HIDDEN)
 clock = pygame.time.Clock()
 
 my_font = pygame.font.SysFont('Arial', fontsize)
 pausetext = my_font.render('PAUSED', False, WHITE)
 pausecenter = pausetext.get_rect(center=(middle, fontsize + 30))
 
-running = True
-while running:
-    reloadscreen()
-    drawphysobj()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
 
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            pos = pygame.mouse.get_pos()
-            physobj.append([list(pos), 0])
-            # записываем в список физических объектов положение объекта и переменную t
+def mainprocess():
+    pygame.display.set_mode(size, flags=pygame.SHOWN)
+    global running, physobj, paused
+    running = True
+    while running:
+        reloadscreen()
+        drawphysobj()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_SPACE:
-                paused = not paused
-            if event.key == pygame.K_r:
-                physobj = []
-            if event.key == pygame.K_s:
-                paused = True
-                screen.blit(pausetext, pausecenter)
-                pygame.display.flip()
-                configscreen()
-            if event.key == pygame.K_BACKSPACE and len(physobj) > 0:
-                physobj.pop()
-    if paused:
-        screen.blit(pausetext, pausecenter)
-    pygame.display.flip()
-    clock.tick(tickrate)
-pygame.quit()
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                pos = pygame.mouse.get_pos()
+                physobj.append([list(pos), 0])
+                # записываем в список физических объектов положение объекта и переменную t
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
+                if event.key == pygame.K_r:
+                    physobj = []
+                if event.key == pygame.K_s:
+                    paused = True
+                    screen.blit(pausetext, pausecenter)
+                    pygame.display.flip()
+                    start()
+                if event.key == pygame.K_BACKSPACE and len(physobj) > 0:
+                    physobj.pop()
+        if paused:
+            screen.blit(pausetext, pausecenter)
+        pygame.display.flip()
+        clock.tick(tickrate)
+
+    pygame.display.set_mode(size, flags=pygame.HIDDEN)
+
+
+# Первым делом соберем настройки пользователя
+start()
