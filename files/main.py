@@ -1,9 +1,8 @@
 import sys
-
+import freefall
 from PyQt6 import uic, QtGui
 from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow
 
-import freefall
 
 
 class Wip(QMainWindow):
@@ -30,12 +29,11 @@ class Ui(QMainWindow):
         w.show()
 
     def loadfreefall(self):
-        freewindow.show()
+        freefall.start()
 
 
 app = QApplication(sys.argv)
 window = Ui()
 window.show()
 w = Wip()
-freewindow = freefall.Ui()
 app.exec()

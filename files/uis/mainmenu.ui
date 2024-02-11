@@ -68,7 +68,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Свободное падение</string>
+        <string>Свободное падение + Отскок</string>
        </property>
       </widget>
      </item>

@@ -38,15 +38,13 @@ def start():
     if __name__ == "__main__":
         if not initialised:
             app2 = QApplication(sys.argv)
-        if window == "closed":
-            window = Ui()
-        window.show()
+    if window == "closed":
+        window = Ui()
+    window.show()
+    if __name__ == "__main__":
         if not initialised:
             initialised = 1
-            print(initialised)
             app2.exec()
-    else:
-        freewindow.show()
 
 
 def drawphysobj():
@@ -80,6 +78,13 @@ def reloadscreen():
     height = size[1]
     # рисуем красивую рамочку по длине экрана
     screen.fill(BLUE)
+
+    blocksize = 35  # Set the size of the grid block
+    for x in range(0, width, blocksize):
+        for y in range(0, height, blocksize):
+            rect = pygame.Rect(x + framesize, y - framesize, blocksize, blocksize)
+            pygame.draw.rect(screen, (160, 160, 160), rect, 1)
+
     pygame.draw.rect(screen, WHITE, pygame.Rect((0, 0), (width, height)), framesize)
 
 
@@ -107,7 +112,7 @@ pygame.init()
 pygame.font.init()
 
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Свободное падение')
+pygame.display.set_caption('Свободное падение + отскок')
 pygame.display.set_icon(pygame.image.load("pics/icon.png"))
 pygame.display.set_mode(size, flags=pygame.HIDDEN)
 clock = pygame.time.Clock()
@@ -139,9 +144,8 @@ def mainprocess():
                 if event.key == pygame.K_r:
                     physobj = []
                 if event.key == pygame.K_s:
-                    paused = True
-                    screen.blit(pausetext, pausecenter)
-                    pygame.display.flip()
+                    running = False
+                    pygame.display.set_mode(size, flags=pygame.HIDDEN)
                     start()
                 if event.key == pygame.K_BACKSPACE and len(physobj) > 0:
                     physobj.pop()
@@ -154,4 +158,5 @@ def mainprocess():
 
 
 # Первым делом соберем настройки пользователя
-start()
+if __name__ == "__main__":
+    start()
